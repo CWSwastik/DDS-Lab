@@ -21,7 +21,7 @@ INSERT INTO Student (name, age, grade) VALUES ('Rahul', 22, 'A');
 ```py
 import sqlite3
 
-def execute_query(query, params):
+def execute_query(query, params = ()):
     with sqlite3.connect('students.db') as conn:
         cursor = conn.cursor()
         cursor.execute(query, params)
