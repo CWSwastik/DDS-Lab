@@ -76,7 +76,7 @@ In this lab, you will create a web application that implements a 3-tier architec
 
 ---
 
-## Part 3: Creating the Flask Application (50 minutes)
+## Part 3: Creating the Flask Application
 
 ### Instructions:
 - Create a Flask application named `app.py`.
@@ -101,9 +101,19 @@ In this lab, you will create a web application that implements a 3-tier architec
              database="school"
          )
          return conn
+
+     @app.route('/')
+     def hello():
+        return '<h1>Hello, World!</h1>'
      ```
 
-2. **Implement CRUD API Endpoints**:
+   - In order to run the Flask server when the script is executed add the following code at the end of the file:
+      ```python
+      if __name__ == '__main__':
+         app.run(debug=True)
+      ```
+
+3. **Implement CRUD API Endpoints**:
    - Implement the following REST API endpoints:
 
      - **Create a new student (POST)**:
@@ -210,7 +220,7 @@ In this lab, you will create a web application that implements a 3-tier architec
      </body>
      </html>
      ```
-
+  
 3. **Render the Template in Flask**:
    - Add an endpoint in `app.py` to render the student list:
 
@@ -225,7 +235,7 @@ In this lab, you will create a web application that implements a 3-tier architec
          conn.close()
          return render_template('students.html', students=students)
      ```
-
+   - The render_template function in Flask is used to generate HTML output by combining a template file (in this case, students.html) with data passed to it. The students data, which is a list of tuples representing rows from the Student table, is passed to the template. The template uses Jinja2 syntax to iterate over the students list and dynamically generate a table displaying the student information. This separates the presentation layer from the application logic, making the code more modular and maintainable.
 ---
 
 ## Part 5: Testing and Validation
@@ -235,6 +245,44 @@ In this lab, you will create a web application that implements a 3-tier architec
 - Access the `students/view` URL in your browser to see the list of students rendered using the Flask template.
 
 ### Task:
-- **Test the Application**:
-  - Use Postman to test the CRUD operations (POST, GET, PUT, DELETE) on the `/students` endpoints.
-  - Visit `http://127.0.0.1:5000/students/view` in your browser to see the rendered list of students.
+- **Test the Application using `curl`**:
+  - **Add a Student**:
+    ```bash
+    curl -X POST -H "Content-Type: application/json" -d '{"name":"Darsh","age":24,"grade":"A"}' http://127.0.0.1:5000/students
+    ```
+    - This command sends a POST request to add a new student named "Darsh" with age 24 and grade "A".
+  
+  - **Get All Students**:
+    ```bash
+    curl http://127.0.0.1:5000/students
+    ```
+    - This command sends a GET request to retrieve all students from the database.
+
+  - **Update a Student**:
+    ```bash
+    curl -X PUT -H "Content-Type: application/json" -d '{"name":"Akshit","age":21,"grade":"A+"}' http://127.0.0.1:5000/students/1
+    ```
+    - This command sends a PUT request to update the student with ID 1, changing Akshit's age to 21 and grade to "A+".
+  
+  - **Delete a Student**:
+    ```bash
+    curl -X DELETE http://127.0.0.1:5000/students/2
+    ```
+    - This command sends a DELETE request to remove the student with ID 2 from the database.
+
+- **Accessing the Template**:
+  - Open a browser and go to `http://127.0.0.1:5000/students/view` to view the student list rendered in an HTML table.
+
+---
+
+## Helpful Resources
+
+For further reading and additional help, you can refer to the following resources:
+
+- **[API Integration in Python](https://realpython.com/api-integration-in-python/):** A comprehensive guide on integrating APIs in Python, helpful for understanding REST APIs.
+  
+- **[How to Build a Web Application Using Flask and Deploy It to the Cloud](https://www.freecodecamp.org/news/how-to-build-a-web-application-using-flask-and-deploy-it-to-the-cloud-3551c985e492/):** This article walks you through building and deploying a Flask web application step by step.
+
+- **[How to Make a Web Application Using Flask in Python 3](https://www.digitalocean.com/community/tutorials/how-to-make-a-web-application-using-flask-in-python-3#step-3-using-html-templates):** A detailed tutorial on creating a Flask web application, with a focus on using HTML templates.
+  
+- **[Flask RESTful CRUD API](https://medium.com/@dennisivy/flask-restful-crud-api-c13c7d82c6e5):** This tutorial covers creating a RESTful CRUD API using Flask, which aligns closely with the CRUD operations in this lab.
