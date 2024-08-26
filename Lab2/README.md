@@ -175,7 +175,8 @@ In this lab, you will create a web application that implements a 3-tier architec
            conn.close()
            return jsonify({'message': 'Student deleted successfully!'})
        ```
-
+### Optional Task:
+- Use a helper function to execute SQL queries to reduce code redundancy similar to the one in Lab 1.
 ---
 
 ## Part 4: Creating Flask Templates
