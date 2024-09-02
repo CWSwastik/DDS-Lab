@@ -12,6 +12,9 @@ In this lab, you will create a Pub/Sub system using Socket.IO:
 - **Subscriber**: Subscribes to channels to receive messages.
 - **Server**: Manages the topics, channels, subscriptions, and message distribution.
 
+![image](https://github.com/user-attachments/assets/4530e1e3-8663-4e02-871a-66c99c7fa5d9)
+
+
 ---
 
 ## **Part 1: Understanding Pub/Sub and Socket.IO Rooms**
@@ -54,10 +57,14 @@ When a client subscribes to a topic, they join a room. When a message is publish
      ```bash
      pip install flask-socketio
      ```
+   - Install requests:
+     ```bash
+     pip install requests
+     ``` 
 
 2. **Set Up Flask Application**:
    - Create a directory for your project.
-   - Inside the project directory, create a Python file named `pubsub_server.py`.
+   - Inside the project directory, create a Python file named `server.py`.
 
 ### **Task**:
 - Set up a basic Flask server with Socket.IO to handle real-time communication.
@@ -71,7 +78,7 @@ When a client subscribes to a topic, they join a room. When a message is publish
 
 ### **Task**:
 1. **Write the Server Code**:
-   - Open `pubsub_server.py` and implement the server code:
+   - Open `server.py` and implement the server code:
 
      ```python
      from flask import Flask, request
@@ -138,7 +145,7 @@ When a client subscribes to a topic, they join a room. When a message is publish
 2. **Run the Server**:
    - Run the server using the command:
      ```bash
-     python pubsub_server.py
+     python server.py
      ```
 
 ---
@@ -149,78 +156,107 @@ When a client subscribes to a topic, they join a room. When a message is publish
 - Create a client that can subscribe to topics and handle incoming messages.
 
 ### **Task**:
-1. **Create a Client Application**:
-   - In the same project directory, create a Python file named `pubsub_client.py`.
+1. **Create a Subscriber Client Application**:
+   - In the same project directory, create a Python file named `subscriber.py`.
    - Implement the client code:
 
-     ```python
-     import socketio
+   ```python
+    import socketio
+    
+    # Create a SocketIO client
+    sio = socketio.Client()
+    
+    # Connect to the server
+    sio.connect('http://localhost:5000')
+    
+    # Callback generator for handling different topics
+    def get_topic_handler(topic):
+        def handle_message(data):
+            print(f"Received message for topic '{topic}': {data}")
+        
+        return handle_message
+    
+    def subscribe_to_topic(topic):
+        sio.emit('subscribe', {'topic': topic})
+        sio.on(topic, get_topic_handler(topic))
+        print(f"Subscribed to topic '{topic}'")
+    
+    def unsubscribe_from_topic(topic):
+        sio.emit('unsubscribe', {'topic': topic})
+        print(f"Unsubscribed from topic '{topic}'")
+    
+    if __name__ == "__main__":
+        while True:
+            ch = input("Enter 1 to subscribe\n2 to unsubscribe\n3 to start listening for messages\n4 to exit: ")
+            if ch == "1":
+                topic = input("Enter topic to subscribe: ")
+                subscribe_to_topic(topic)
+            elif ch == "2":
+                topic = input("Enter topic to unsubscribe: ")
+                unsubscribe_from_topic(topic)
+            elif ch == "3":
+                sio.wait() # Keep the connection open to receive messages
+            else:
+                break
 
-     # Create a SocketIO client
-     sio = socketio.Client()
-
-     # Connect to the server
-     sio.connect('http://localhost:5000')
-
-     def subscribe_to_topic(topic):
-         sio.emit('subscribe', {'topic': topic})
-         print(f"Subscribed to topic '{topic}'")
-
-     def unsubscribe_from_topic(topic):
-         sio.emit('unsubscribe', {'topic': topic})
-         print(f"Unsubscribed from topic '{topic}'")
-
-     # Example callback for handling different topics
-     @sio.on('news')
-     def handle_news(data):
-         print(f"Received on 'news': {data['message']}")
-
-     @sio.on('sports')
-     def handle_sports(data):
-         print(f"Received on 'sports': {data['message']}")
-
-     @sio.on('weather')
-     def handle_weather(data):
-         print(f"Received on 'weather': {data['message']}")
-
-     # Subscribe to topics
-     subscribe_to_topic('news')
-     subscribe_to_topic('sports')
-
-     # Example of unsubscribing from a topic
-     unsubscribe_from_topic('news')
-
-     # Keep the connection open to receive messages
-     sio.wait()
      ```
 
 2. **Run the Client**:
    - Run the client using the command:
      ```bash
-     python pubsub_client.py
+     python subscriber.py
      ```
 
 ---
 
-## **Part 5: Publishing Messages**
-
+## **Part 5: Implementing the Publisher Client**
 ### **Instructions**:
-- Test the Pub/Sub system by publishing messages to topics.
+- Create a publisher client that can publish to topics using requests.
 
 ### **Task**:
-1. **Use curl to Publish Messages**:
-   - Publish messages to different topics using the following commands:
+1. **Create a Publisher Client Application**:
+   - In the same project directory, create a Python file named `publisher.py`.
+   - Implement the publisher client code:
+   ```python
+    import requests
+    
+    def publish_message(topic, message):
+        url = 'http://localhost:5000/publish'
+        data = {'topic': topic, 'message': message}
+        try:
+            response = requests.post(url, json=data)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return
+    
+        if response.status_code == 200:
+            print(f"Message published to topic '{topic}'")
+        elif response.status_code == 404:
+            print(f"Failed to publish message: {response.text}")
+        else:
+            print(f"An error occurred: {response.status_code}")
+    
+    if __name__ == "__main__":
+        while True:
+            # Take topic and message from the user via CLI
+            topic = input("Enter topic (or 'exit' to quit): ")
+            if topic.lower() == 'exit':
+                break
+            message = input(f"Enter message to publish to '{topic}': ")
+    
+            # Publish the message to the given topic
+            publish_message(topic, message)
 
+   ```
+   
+2. **Run the Client**:
+   - Run the client using the command:
      ```bash
-     curl -X POST -H "Content-Type: application/json" -d '{"topic":"news", "message":"Breaking news!"}' http://localhost:5000/publish
-     curl -X POST -H "Content-Type: application/json" -d '{"topic":"sports", "message":"Sports update!"}' http://localhost:5000/publish
-     curl -X POST -H "Content-Type: application/json" -d '{"topic":"weather", "message":"Weather forecast!"}' http://localhost:5000/publish
+     python publisher.py
      ```
-
-2. **Expected Output**:
-   - The client subscribed to the `news` topic should receive "Breaking news!".
-   - The client subscribed to the `sports` topic should receive "Sports update!".
-   - The client subscribed to the `weather` topic should receive "Weather forecast!".
+   
+### **Instructions**:
+- Test the Pub/Sub system by publishing messages to topics and spawning multiple subscriber processes.
 
 ---
 
