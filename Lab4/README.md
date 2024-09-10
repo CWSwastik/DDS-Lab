@@ -59,7 +59,45 @@ The lab will guide you through implementing these functionalities step by step.
 
 ## **Code Breakdown:**
 
-#### **Step 1: Initializing a Node Class**
+### **Step 0: Setup**
+
+##### **1. Importing Required Libraries**
+```python
+import socket
+import threading
+import pickle
+import hashlib
+import time
+import os
+from collections import OrderedDict
+```
+The key libraries used here are:
+
+- `socket`: For communication between nodes.
+- `threading`: To handle multiple connections simultaneously.
+- `pickle`: For serializing and deserializing data between nodes.
+- `hashlib`: To implement the hashing mechanism for node and file identifiers.
+##### **2. Defining the Global Variables**
+We define some key constants like the IP, Port, and buffer size for data transmission.
+
+```python
+IP = "127.0.0.1"
+PORT = 2000
+buffer = 4096
+
+MAX_BITS = 10        # 10-bit for hash space
+MAX_NODES = 2 ** MAX_BITS
+```
+##### **3. Hash Function**
+We create a hash function that takes a string key, hashes it using SHA-1, and then compresses it into a 10-bit integer.
+
+```python
+def getHash(key):
+    result = hashlib.sha1(key.encode())
+    return int(result.hexdigest(), 16) % MAX_NODES
+```
+
+### **Step 1: Initializing a Node Class**
 
 ```python
 class Node:
@@ -92,7 +130,7 @@ class Node:
 
 ---
 
-#### **Step 2: Listening for Connections**
+### **Step 2: Listening for Connections**
 
 ```python
 def listenThread(self):
@@ -112,7 +150,7 @@ def listenThread(self):
 
 ---
 
-#### **Step 3: Handling Peer Connections**
+### **Step 3: Handling Peer Connections**
 
 ```python
 def connectionThread(self, connection, address):
@@ -146,7 +184,7 @@ def connectionThread(self, connection, address):
 
 ---
 
-#### **Step 4: Handling new node joins**
+### **Step 4: Handling new node joins**
 
 ```python
 def joinNode(self, connection, address, rDataList):
@@ -174,7 +212,7 @@ def joinNode(self, connection, address, rDataList):
 
 ---
 
-#### **Step 5: File Transfer**
+### **Step 5: File Transfer**
 
 ```python
 def transferFile(self, connection, address, rDataList):
@@ -200,7 +238,7 @@ def transferFile(self, connection, address, rDataList):
 
 ---
 
-#### **Step 6: Lookup ID**
+### **Step 6: Lookup ID**
 
 ```python
 def lookupID(self, connection, address, rDataList):
@@ -245,7 +283,7 @@ This method is responsible for locating the node responsible for a given key. Th
 
 ---
 
-#### **Step 7: Updating Successor and Predecessor**
+### **Step 7: Updating Successor and Predecessor**
 
 ```python
 def updateSucc(self, rDataList):
@@ -277,7 +315,7 @@ This method updates the predecessor of the current node:
 
 ---
 
-#### **Step 8: Thread for Pinging**
+### **Step 8: Thread for Pinging**
 
 ```python
 def start(self):
@@ -350,7 +388,7 @@ This method periodically pings the successor node:
 
 ---
 
-#### **Step 9: Handling user input**
+### **Step 9: Handling user input**
 
 ```python
     def asAClientThread(self):
@@ -386,7 +424,7 @@ This method handles outgoing connections based on user input:
 
 ---
 
-#### **Step 10: Joining and Leaving the Network**
+### **Step 10: Joining and Leaving the Network**
 
 ```python
 def sendJoinRequest(self, ip, port):
@@ -472,7 +510,7 @@ This method handles the process of leaving the network:
 
 ---
 
-#### **Step 11: Uploading and Downloading Files**
+### **Step 11: Uploading and Downloading Files**
 
 ```python
 def uploadFile(self, filename, recvIPport, replicate):
@@ -563,7 +601,7 @@ This method recursively queries the network to find the successor for a given ke
 
 ---
 
-#### **Step 12: Updating Finger Tables**
+### **Step 12: Updating Finger Tables**
 
 ```python
 def updateFTable(self):
@@ -614,7 +652,7 @@ This method updates the finger tables of other nodes in the network:
 
 ---
 
-#### **Step 13: Sending and Receiving files over the socket connection**
+### **Step 13: Sending and Receiving files over the socket connection**
 
 ```python
 def sendFile(self, connection, filename):
@@ -703,7 +741,7 @@ This method handles receiving a file over a socket connection:
 
 ---
 
-#### **Step 14: Printing info**
+### **Step 14: Printing info**
 
 ```python
     def printMenu(self):
