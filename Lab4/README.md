@@ -1,4 +1,4 @@
-# **Labsheet 4: Distributed Hash Table (DHT) using Python**
+# **Labsheet 4: Implementing a Distributed Hash Table (Chord Protocol) using Python**
 
 ## **Objective:**
 
